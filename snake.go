@@ -1,16 +1,83 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
 
 const windowWidth, windowHeight = 800, 600
+const foodWidth, foodHeight = 3, 3
+const snakeBodyWidth, snakeBodyHeight = 4, 3
+
+type food struct {
+	position
+	color         color
+	width, height int
+}
+
+type position struct {
+	x, y int
+}
 
 type color struct {
 	r, g, b byte
 }
+
+type grid struct {
+	g             [][]bool
+	width, height int
+}
+
+// create returns a food with a random position within the game grid
+// which is not occupied by the snake
+func (f food) create(g grid) {
+}
+
+/* ------------------------ Grid Helper Functions ------------------------ */
+
+// get unoccupied pixel block returns a block of pixels within window boundaries
+// that does not overlap with occupied pixels
+func (g grid) getRandomUnoccupiedPixelBlock() {
+
+}
+
+func (g grid) isCompletelyOccupied() bool {
+	for _, row := range g.g {
+		for _, val := range row {
+			if !val {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// get random unoccupied pixel returns the position of a random pixel
+// in the grid that is unoccupied
+func (g grid) getRandomUnoccupiedPixel() (position, error) {
+	if g.isCompletelyOccupied() {
+		return position{}, errors.New("grid is completely occupied")
+	}
+
+	seed := rand.NewSource(time.Now().UnixNano())
+	gen := rand.New(seed)
+
+	x := gen.Intn(g.width)
+	y := gen.Intn(g.height)
+
+	// if pixel is not occupied
+	if !g.g[y][x] {
+		return position{x, y}, nil
+	} else {
+		return g.getRandomUnoccupiedPixel()
+	}
+}
+
+/* -------------------------- GUI Helper functions -------------------------- */
 
 func setPixel(x, y int, c color, pixels []byte) {
 	index := (y*windowWidth + x) * 4
